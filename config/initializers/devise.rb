@@ -39,14 +39,8 @@ Devise.setup do |config|
   require 'devise/orm/active_record'
 
   # ==> Configuration for any authentication mechanism
-  # Configure which keys are used when authenticating a user. The default is
-  # just :email. You can configure it to use [:username, :subdomain], so for
-  # authenticating a user, both parameters are required. Remember that those
-  # parameters are used only when authenticating and not when retrieving from
-  # session. If you need permissions, you should implement that in a before filter.
-  # You can also supply a hash where the value is a boolean determining whether
-  # or not authentication should be aborted when the value is not present.
-  # config.authentication_keys = [:email]
+  # Authentication with email or phone_number via a unified :login param
+  config.authentication_keys = [:login]
 
   # Configure parameters from the request object used for authentication. Each entry
   # given should be a request method and it will automatically be passed to the
@@ -151,7 +145,7 @@ Devise.setup do |config|
   # their account can't be confirmed with the token any more.
   # Default is nil, meaning there is no restriction on how long a user can take
   # before confirming their account.
-  # config.confirm_within = 3.days
+  config.confirm_within = 6.hours
 
   # If true, requires any email changes to be confirmed (exactly the same way as
   # initial account confirmation) to be applied. Requires additional unconfirmed_email
@@ -310,4 +304,22 @@ Devise.setup do |config|
   # When set to false, does not sign a user in automatically after their password is
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   # config.sign_in_after_change_password = true
+
+  # JWT configuration for API auth
+  jwt_secret = Rails.application.credentials.dig(:jwt, :secret) || Rails.application.secret_key_base
+  config.jwt do |jwt|
+    jwt.secret = jwt_secret
+
+    jwt.dispatch_requests = [
+      ["POST", %r{^/players/login$}],
+      ["POST", %r{^/managers/login$}],
+    ]
+
+    jwt.revocation_requests = [
+      ["DELETE", %r{^/players/logout$}],
+      ["DELETE", %r{^/managers/logout$}],
+    ]
+
+    jwt.expiration_time = 24.hours.to_i
+  end
 end
