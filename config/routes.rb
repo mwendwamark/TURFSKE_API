@@ -20,6 +20,8 @@ Rails.application.routes.draw do
     put "/managers/password", to: "managers/passwords#update"
 
     # Email confirmation
+    post "/auth/confirmation", to: "auth/confirmations#create"
+    post "/auth/confirmation/resend", to: "auth/confirmations#resend"
     get "/auth/confirmation", to: "auth/confirmations#show", as: :user_confirmation
   end
 

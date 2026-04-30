@@ -50,21 +50,40 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  smtp_setting = lambda do |env_key, credential_key, fallback = nil|
+    ENV[env_key] || Rails.application.credentials.dig(:smtp, credential_key) || fallback
+  end
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  smtp_bool = lambda do |env_key, credential_key, fallback|
+    ActiveModel::Type::Boolean.new.cast(smtp_setting.call(env_key, credential_key, fallback).to_s)
+  end
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  app_host = ENV["APP_HOST"] || Rails.application.credentials.dig(:app, :host) || "example.com"
+  app_protocol = ENV["APP_PROTOCOL"] || Rails.application.credentials.dig(:app, :protocol) || "https"
+  smtp_port = smtp_setting.call("SMTP_PORT", :port, 587).to_i
+  smtp_ssl = smtp_bool.call("SMTP_SSL", :ssl, false)
+  smtp_starttls_requested = smtp_bool.call("SMTP_ENABLE_STARTTLS_AUTO", :enable_starttls_auto, !smtp_ssl && smtp_port != 465)
+  smtp_starttls = (smtp_ssl || smtp_port == 465) ? false : smtp_starttls_requested
+  smtp_from = smtp_setting.call("SMTP_FROM", :from, ENV.fetch("DEVISE_MAILER_SENDER", "no-reply@turfske.local"))
+
+  config.action_mailer.perform_caching = false
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.default_url_options = { host: app_host, protocol: app_protocol }
+  config.action_mailer.default_options = {
+    from: smtp_from,
+  }
+  config.action_mailer.smtp_settings = {
+    address: smtp_setting.call("SMTP_ADDRESS", :address, "smtp.gmail.com"),
+    port: smtp_port,
+    domain: smtp_setting.call("SMTP_DOMAIN", :domain, app_host),
+    user_name: smtp_setting.call("SMTP_USERNAME", :user_name),
+    password: smtp_setting.call("SMTP_PASSWORD", :password),
+    authentication: smtp_setting.call("SMTP_AUTHENTICATION", :authentication, "plain").to_sym,
+    enable_starttls_auto: smtp_starttls,
+    ssl: smtp_ssl,
+    openssl_verify_mode: smtp_setting.call("SMTP_OPENSSL_VERIFY_MODE", :openssl_verify_mode, "peer"),
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

@@ -9,7 +9,7 @@ module Players
 
       if resource.save
         render json: {
-          message: "Signup successful. You can now log in.",
+          message: "Signup successful. Please confirm your email before logging in.",
           user: user_json(resource)
         }, status: :created
       else

@@ -2,21 +2,22 @@ module Managers
   class SessionsController < Devise::SessionsController
     include ActionController::MimeResponds
     respond_to :json
+    before_action :authenticate_user!, only: :destroy
 
     # POST /managers/login
     def create
       normalize_login_param!
-      user = find_user_for_login
+      self.resource = warden.authenticate(auth_options)
 
-      unless user
+      if resource.nil?
+        return render json: { error: "Please confirm your email before logging in." }, status: :unauthorized if unconfirmed_login_attempt?
         return render json: { error: "Invalid login credentials" }, status: :unauthorized
       end
 
-      unless user.manager?
+      unless resource.manager?
         return render json: { error: "Role mismatch. Use the correct portal for your role." }, status: :forbidden
       end
 
-      self.resource = warden.authenticate!(auth_options)
       sign_in(resource_name, resource)
 
       token = request.env["warden-jwt_auth.token"] || response.headers["Authorization"]&.split(" ")&.last
@@ -40,11 +41,16 @@ module Managers
       params[:user][:login] ||= params[:user][:email] || params[:user][:phone_number]
     end
 
-    def find_user_for_login
-      return nil unless params[:user]
-      login = params[:user][:login]
+    def unconfirmed_login_attempt?
+      user = user_for_login_identifier
+      user.present? && !user.confirmed? && user.valid_password?(params.dig(:user, :password).to_s)
+    end
+
+    def user_for_login_identifier
+      login = params.dig(:user, :login).to_s.strip
       return nil if login.blank?
-      User.where("lower(email) = ?", login.downcase).or(User.where(phone_number: login)).first
+
+      User.find_for_database_authentication(login: login)
     end
 
     def user_json(user)

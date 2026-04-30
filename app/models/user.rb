@@ -11,6 +11,8 @@ class User < ApplicationRecord
          jwt_revocation_strategy: self
 
   # Validations
+  validates :first_name, presence: true
+  validates :last_name, presence: true
   validates :phone_number, format: { with: /\A\+?\d{10,15}\z/ }, allow_blank: true, uniqueness: { allow_nil: true }
   validate :single_valid_role
 
@@ -36,7 +38,9 @@ class User < ApplicationRecord
   end
 
   # Generate JTI before creating user
+  before_validation :normalize_contact_fields
   before_create :generate_jti
+  before_update :refresh_jti_for_password_change, if: :will_save_change_to_encrypted_password?
 
   # Allow login by email or phone_number
   def self.find_for_database_authentication(warden_conditions)
@@ -60,6 +64,15 @@ class User < ApplicationRecord
 
   def generate_jti
     self.jti ||= SecureRandom.uuid
+  end
+
+  def normalize_contact_fields
+    self.email = email.to_s.strip.downcase
+    self.phone_number = phone_number.to_s.gsub(/\s+/, "")
+  end
+
+  def refresh_jti_for_password_change
+    self.jti = SecureRandom.uuid
   end
 
   def single_valid_role
