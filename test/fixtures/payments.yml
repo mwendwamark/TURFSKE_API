@@ -1,0 +1,27 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  turf_venue: one
+  user: one
+  payment_type: MyString
+  amount_kobo: 1
+  currency: MyString
+  paystack_reference: MyString
+  paystack_transaction_id: MyString
+  channel: MyString
+  status: MyString
+  paystack_metadata: 
+  paid_at: MyString
+
+two:
+  turf_venue: two
+  user: two
+  payment_type: MyString
+  amount_kobo: 1
+  currency: MyString
+  paystack_reference: MyString
+  paystack_transaction_id: MyString
+  channel: MyString
+  status: MyString
+  paystack_metadata: 
+  paid_at: MyString

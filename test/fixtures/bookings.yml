@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  turf: one
+  reference_number: MyString
+  slot_date: 2026-05-02
+  start_time: 2026-05-02 14:01:38
+  end_time: 2026-05-02 14:01:38
+  duration_hours: 9.99
+  amount_kes: 1
+  status: MyString
+  cancel_reason: MyText
+  cancelled_by: MyString
+
+two:
+  turf: two
+  reference_number: MyString
+  slot_date: 2026-05-02
+  start_time: 2026-05-02 14:01:38
+  end_time: 2026-05-02 14:01:38
+  duration_hours: 9.99
+  amount_kes: 1
+  status: MyString
+  cancel_reason: MyText
+  cancelled_by: MyString

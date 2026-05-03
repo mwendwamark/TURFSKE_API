@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  turf: one
+  day_of_week: 1
+  is_open: false
+  open_time: 2026-05-02 14:01:18
+  close_time: 2026-05-02 14:01:18
+
+two:
+  turf: two
+  day_of_week: 1
+  is_open: false
+  open_time: 2026-05-02 14:01:18
+  close_time: 2026-05-02 14:01:18

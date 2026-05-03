@@ -1,0 +1,37 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  turf_venue: one
+  showers: false
+  toilets: false
+  floodlights: false
+  ball_provided: false
+  free_parking: false
+  drinking_water: false
+  bibs_vests: false
+  spectator_seating: false
+  canteen: false
+  referee: false
+  cctv: false
+  wifi: false
+  first_aid: false
+  changing_rooms: false
+  extra_notes: MyText
+
+two:
+  turf_venue: two
+  showers: false
+  toilets: false
+  floodlights: false
+  ball_provided: false
+  free_parking: false
+  drinking_water: false
+  bibs_vests: false
+  spectator_seating: false
+  canteen: false
+  referee: false
+  cctv: false
+  wifi: false
+  first_aid: false
+  changing_rooms: false
+  extra_notes: MyText

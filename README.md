@@ -1,67 +1,166 @@
 # TURFSKE_API
 
-Rails 8 API backend for the TURFSKE application with JWT authentication.
+Rails 8 API backend for the TURFSKE application with JWT authentication via Devise.
 
-## Prerequisites
+## System Requirements
 
-- Ruby 3.2.3
-- PostgreSQL
-- Bundler
+### Operating System
+- Linux (Ubuntu 20.04+ recommended) or macOS
 
-## System Dependencies
+### Required System Packages
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install -y \
+  build-essential \
+  libpq-dev \
+  postgresql \
+  postgresql-contrib \
+  git \
+  curl \
+  libssl-dev \
+  libreadline-dev \
+  zlib1g-dev \
+  autoconf \
+  bison \
+  libyaml-dev \
+  libncurses5-dev \
+  libffi-dev \
+  libgdbm-dev
+```
 
-### Ruby Gems
-- **Rails 8.0.5** - Web framework
-- **PostgreSQL (pg ~> 1.1)** - Database
-- **Puma (>= 5.0)** - Web server
-- **Devise (~> 4.9)** - Authentication
-- **Devise-JWT (~> 0.11)** - JWT token authentication
-- **jsonapi-serializer** - JSON API serialization
-- **rack-cors** - Cross-Origin Resource Sharing
-- **solid_cache** - Database-backed caching
-- **solid_queue** - Background job processing
-- **solid_cable** - WebSocket cable
-- **bootsnap** - Boot time optimization
-- **kamal** - Docker deployment (optional)
-- **thruster** - HTTP caching/compression for Puma
+### Required Tools
+| Tool | Version | Installation |
+|------|---------|--------------|
+| Ruby | 3.2.3 | Use [rbenv](https://github.com/rbenv/rbenv) or [rvm](https://rvm.io) |
+| PostgreSQL | 18.3+ | `sudo apt-get install postgresql postgresql-contrib` |
+| Bundler | latest | `gem install bundler` |
+| Git | latest | `sudo apt-get install git` |
 
-### Development/Test Gems
-- debug
-- brakeman (security scanning)
-- rubocop-rails-omakase (code style)
+### Ruby Version Management (rbenv)
+```bash
+# Install rbenv
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+source ~/.bashrc
+
+# Install ruby-build plugin
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+
+# Install Ruby 3.2.3
+rbenv install 3.2.3
+rbenv global 3.2.3
+rbenv rehash
+```
+
+## Project Dependencies
+
+### Ruby Gems (from Gemfile)
+
+**Core:**
+- `rails 8.0.5` - Web framework
+- `pg ~> 1.1` - PostgreSQL adapter
+- `puma >= 5.0` - Web server
+- `bootsnap` - Boot time optimization
+
+**Authentication & API:**
+- `devise ~> 4.9` - Authentication
+- `devise-jwt ~> 0.11` - JWT token authentication
+- `jsonapi-serializer` - JSON API serialization
+- `rack-cors` - CORS handling
+
+**Rails Solid Components:**
+- `solid_cache` - Database-backed caching
+- `solid_queue` - Background job processing
+- `solid_cable` - WebSocket cable
+
+**Optional/Deployment:**
+- `kamal` - Docker deployment
+- `thruster` - HTTP caching/compression
+
+**Development & Test:**
+- `debug` - Debugging
+- `brakeman` - Security scanning
+- `rubocop-rails-omakase` - Code style
+
+Full dependency tree is in `Gemfile.lock`.
 
 ## Setup Instructions
 
-1. Clone the repository and navigate to the API directory:
-   ```bash
-   cd TURFSKE_API
-   ```
+### 1. Clone & Navigate
+```bash
+git clone <repository-url>
+cd TURFSKE/TURFSKE_API
+```
 
-2. Install Ruby gems:
-   ```bash
-   bundle install
-   ```
+### 2. Install Ruby Version
+```bash
+rbenv install 3.2.3  # if not already installed
+rbenv local 3.2.3
+```
 
-3. Configure environment variables (create `.env` file if needed):
-   - `DATABASE_URL` - PostgreSQL connection string
-   - `JWT_SECRET_KEY` - Secret key for JWT tokens
+### 3. Install Gems
+```bash
+gem install bundler
+bundle install
+```
 
-4. Database setup:
-   ```bash
-   rails db:create
-   rails db:migrate
-   rails db:seed  # if seeds exist
-   ```
+### 4. PostgreSQL Setup
+```bash
+# Start PostgreSQL service
+sudo service postgresql start
 
-5. Start the server:
-   ```bash
-   rails server -p 3000
-   ```
+# Create PostgreSQL user (if needed)
+sudo -u postgres createuser -s $USER
+sudo -u postgres psql -c "ALTER USER $USER WITH PASSWORD 'your_password';"
 
-## Configuration
+# Or set password for postgres user
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+```
 
-- CORS settings: Configure in `config/initializers/cors.rb`
-- Devise JWT: Configure in `config/initializers/devise.rb`
+### 5. Environment Configuration
+Create `.env` file in project root (do not commit):
+```bash
+DATABASE_URL=postgresql://localhost/turfske_api_development
+RAILS_ENV=development
+```
+
+Or set these in your shell profile.
+
+### 6. Database Setup
+```bash
+# Create databases
+rails db:create
+
+# Run migrations
+rails db:migrate
+
+# Seed data (if available)
+rails db:seed
+```
+
+### 7. Run the Server
+```bash
+rails server -p 3000
+```
+
+Server will be available at `http://localhost:3000`
+
+## Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `config/database.yml` | Database configuration (PostgreSQL) |
+| `config/credentials.yml.enc` | Encrypted credentials (edit with `rails credentials:edit`) |
+| `config/master.key` | Decryption key (keep secret!) |
+| `config/initializers/cors.rb` | CORS settings |
+| `config/initializers/devise.rb` | Devise configuration |
+| `config/puma.rb` | Puma server configuration |
+
+## Services Required
+
+- **PostgreSQL** - Must be running (`sudo service postgresql start`)
 
 ## Running Tests
 
@@ -69,6 +168,27 @@ Rails 8 API backend for the TURFSKE application with JWT authentication.
 rails test
 ```
 
+## Troubleshooting
+
+**PostgreSQL connection error:**
+```bash
+sudo service postgresql status
+sudo service postgresql start
+```
+
+**Gem install errors:**
+```bash
+bundle clean --force
+bundle install
+```
+
+**Ruby version mismatch:**
+```bash
+rbenv versions
+rbenv local 3.2.3
+```
+
 ## Deployment
 
-This app supports deployment via [Kamal](https://kamal-deploy.org). See `config/deploy.yml` for configuration.
+This application supports deployment via [Kamal](https://kamal-deploy.org).
+Configuration is in `config/deploy.yml`.

@@ -1,0 +1,35 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  turf_venue: one
+  name: MyString
+  surface_type: MyString
+  pitch_format: MyString
+  pitch_length_m: 9.99
+  pitch_width_m: 9.99
+  price_per_hour: 1
+  peak_price: 1
+  peak_from: 2026-05-02 14:01:01
+  peak_to: 2026-05-02 14:01:01
+  min_booking_minutes: 1
+  slot_duration_minutes: 1
+  buffer_minutes: 1
+  auto_approve: false
+  status: MyString
+
+two:
+  turf_venue: two
+  name: MyString
+  surface_type: MyString
+  pitch_format: MyString
+  pitch_length_m: 9.99
+  pitch_width_m: 9.99
+  price_per_hour: 1
+  peak_price: 1
+  peak_from: 2026-05-02 14:01:01
+  peak_to: 2026-05-02 14:01:01
+  min_booking_minutes: 1
+  slot_duration_minutes: 1
+  buffer_minutes: 1
+  auto_approve: false
+  status: MyString
