@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_02_110234) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_03_044144) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "amenities", force: :cascade do |t|
     t.bigint "turf_venue_id", null: false
@@ -49,6 +77,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_02_110234) do
     t.string "cancelled_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "player_id"
+    t.index ["player_id"], name: "index_bookings_on_player_id"
     t.index ["turf_id"], name: "index_bookings_on_turf_id"
   end
 
@@ -77,7 +107,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_02_110234) do
     t.text "comment"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "player_id"
     t.index ["booking_id"], name: "index_reviews_on_booking_id"
+    t.index ["player_id"], name: "index_reviews_on_player_id"
     t.index ["turf_id"], name: "index_reviews_on_turf_id"
   end
 
@@ -155,12 +187,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_02_110234) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "amenities", "turf_venues"
   add_foreign_key "bookings", "turves"
+  add_foreign_key "bookings", "users", column: "player_id"
   add_foreign_key "payments", "turf_venues"
   add_foreign_key "payments", "users"
   add_foreign_key "reviews", "bookings"
   add_foreign_key "reviews", "turves"
+  add_foreign_key "reviews", "users", column: "player_id"
   add_foreign_key "turf_availabilities", "turves"
   add_foreign_key "turf_venues", "users"
   add_foreign_key "turves", "turf_venues"

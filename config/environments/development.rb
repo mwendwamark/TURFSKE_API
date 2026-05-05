@@ -27,7 +27,7 @@ Rails.application.configure do
   config.cache_store = :memory_store
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  config.active_storage.service = :google
 
   smtp_setting = lambda do |env_key, credential_key, fallback = nil|
     ENV[env_key] || Rails.application.credentials.dig(:smtp, credential_key) || fallback

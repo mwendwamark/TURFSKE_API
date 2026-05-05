@@ -37,6 +37,7 @@ gem "rack-cors"
 gem "devise", "~> 4.9"
 gem "devise-jwt", "~> 0.11"
 gem 'jsonapi-serializer'
+gem "google-cloud-storage", require: false
 
 
 

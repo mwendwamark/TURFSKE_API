@@ -25,6 +25,29 @@ Rails.application.routes.draw do
     get "/auth/confirmation", to: "auth/confirmations#show", as: :user_confirmation
   end
 
+  namespace :managers do
+    resources :turf_venues do
+      collection do
+        post :complete_create
+      end
+      member do
+        post   :upload_images
+        delete "delete_image/:image_id", action: :delete_image, as: :delete_image
+      end
+
+      resource  :amenity,      only: [:show, :create]
+      resources :turfs do
+        resources :availability,
+          controller: "turf_availabilities",
+          only: [:index, :create]
+      end
+    end
+  end
+
+  namespace :players do
+    resources :turf_venues, only: [:index, :show]
+  end
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
 end
