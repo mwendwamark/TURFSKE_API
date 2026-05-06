@@ -32,9 +32,11 @@ class User < ApplicationRecord
     Array(roles).include?("manager")
   end
 
-  # JWT revocation check
-  def jwt_revoked?(payload, user)
-    payload["jti"] != user.jti
+  # JWT revocation check - returns true if token is revoked
+  # With JTIMatcher, we track revocation by comparing JTI
+  # If JTI in token doesn't match user's current JTI, it's revoked
+  def jwt_revoked?(payload, _user)
+    payload["jti"] != jti
   end
 
   # Generate JTI before creating user
