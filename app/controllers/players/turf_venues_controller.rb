@@ -37,7 +37,7 @@ module Players
           )
         SQL
 
-        venues = venues.select("turfs.*, #{haversine_sql} AS distance_km").order("distance_km ASC")
+        venues = venues.select("turf_venues.*, #{haversine_sql} AS distance_km").order("distance_km ASC")
       else
         venues = venues.order(created_at: :desc)
       end

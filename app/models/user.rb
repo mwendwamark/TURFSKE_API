@@ -88,5 +88,6 @@ class User < ApplicationRecord
   end
 
   has_many :turf_venues, foreign_key: :user_id, dependent: :destroy
+  has_many :payments, dependent: :destroy
   has_many :bookings, foreign_key: :player_id, class_name: "Booking"
 end

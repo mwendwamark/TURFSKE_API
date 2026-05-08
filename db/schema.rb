@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_03_044144) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_08_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -83,7 +83,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_03_044144) do
   end
 
   create_table "payments", force: :cascade do |t|
-    t.bigint "turf_venue_id", null: false
+    t.bigint "turf_venue_id"
     t.bigint "user_id", null: false
     t.string "payment_type"
     t.integer "amount_kobo"
@@ -96,6 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_03_044144) do
     t.string "paid_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["paystack_reference"], name: "index_payments_on_paystack_reference", unique: true
     t.index ["turf_venue_id"], name: "index_payments_on_turf_venue_id"
     t.index ["user_id"], name: "index_payments_on_user_id"
   end
@@ -140,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_03_044144) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["paystack_reference"], name: "index_turf_venues_on_paystack_reference", unique: true
     t.index ["user_id"], name: "index_turf_venues_on_user_id"
   end
 

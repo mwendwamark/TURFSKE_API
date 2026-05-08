@@ -1,5 +1,8 @@
 module Managers
   class TurfVenuesController < ApplicationController
+    class ListingPaymentAlreadyUsed < StandardError; end
+    class ListingPaymentRequired < StandardError; end
+
     before_action :authenticate_manager!
     before_action :set_venue, only: [:show, :update, :destroy, :upload_images, :delete_image]
 
@@ -34,10 +37,16 @@ module Managers
     # POST /managers/turf_venues/complete_create
     # Creates venue, amenity, turf, availability, and uploads images in a single transaction
     def complete_create
+      listing_payment = paid_listing_payment!
+
       ActiveRecord::Base.transaction do
+        listing_payment.lock!
+        raise ListingPaymentAlreadyUsed, "This listing payment has already been used." if listing_payment.turf_venue_id.present?
+
         # 1. Create venue
         @venue = current_user.turf_venues.build(complete_create_venue_params)
         @venue.status = "active" if @venue.status.blank?
+        @venue.paystack_reference = listing_payment.paystack_reference
         @venue.save!
 
         # 2. Create amenity if provided
@@ -71,6 +80,8 @@ module Managers
             end
           end
         end
+
+        listing_payment.update!(turf_venue: @venue)
       end
 
       # 5. Upload images if provided (outside transaction — images can be added later)
@@ -82,6 +93,8 @@ module Managers
       end
 
       render json: { message: "Turf venue created successfully", venue: venue_detail_json(@venue) }, status: :created
+    rescue ListingPaymentRequired, ListingPaymentAlreadyUsed => e
+      render json: { errors: [e.message] }, status: :payment_required
     rescue ActiveRecord::RecordInvalid => e
       # Rollback happens automatically due to transaction
       render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
@@ -177,6 +190,18 @@ module Managers
         :latitude, :longitude, :contact_phone, :whatsapp_number,
         :contact_email, :status
       )
+    end
+
+    def paid_listing_payment!
+      reference = params[:listing_payment_reference].presence || params.dig(:payment, :reference).presence
+      raise ListingPaymentRequired, "A successful listing fee payment is required before publishing a turf." if reference.blank?
+
+      payment = current_user.payments.listing_fee.find_by(paystack_reference: reference)
+      raise ListingPaymentRequired, "Listing payment was not found for this manager." if payment.blank?
+      raise ListingPaymentRequired, "Listing payment is not successful yet." unless payment.successful?
+      raise ListingPaymentAlreadyUsed, "This listing payment has already been used." if payment.turf_venue_id.present?
+
+      payment
     end
 
     # Compact JSON for index — includes amenity summary, turf list, and image URLs

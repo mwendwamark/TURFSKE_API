@@ -2,6 +2,7 @@ class TurfVenue < ApplicationRecord
   belongs_to :user
   has_one    :amenity, dependent: :destroy
   has_many   :turfs, dependent: :destroy
+  has_many   :payments, dependent: :nullify
   has_many_attached :images
 
   validates :name, :full_address, :county, :latitude, :longitude, :contact_phone, presence: true

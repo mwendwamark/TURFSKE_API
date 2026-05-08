@@ -26,6 +26,12 @@ Rails.application.routes.draw do
   end
 
   namespace :managers do
+    resources :listing_payments, only: [:create], param: :reference do
+      collection do
+        get ":reference", action: :show
+      end
+    end
+
     resources :turf_venues do
       collection do
         post :complete_create
@@ -47,6 +53,8 @@ Rails.application.routes.draw do
   namespace :players do
     resources :turf_venues, only: [:index, :show]
   end
+
+  post "/paystack/webhook", to: "paystack_webhooks#create"
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
