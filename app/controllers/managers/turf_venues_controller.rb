@@ -198,10 +198,37 @@ module Managers
 
       payment = current_user.payments.listing_fee.find_by(paystack_reference: reference)
       raise ListingPaymentRequired, "Listing payment was not found for this manager." if payment.blank?
+
+      verify_payment!(payment) unless payment.successful?
+
       raise ListingPaymentRequired, "Listing payment is not successful yet." unless payment.successful?
       raise ListingPaymentAlreadyUsed, "This listing payment has already been used." if payment.turf_venue_id.present?
 
       payment
+    end
+
+    def verify_payment!(payment)
+      response = PaystackService.new.verify_transaction(payment.paystack_reference)
+      return payment.update!(paystack_metadata: response) unless response[:status]
+
+      update_payment_from_paystack!(payment, response[:data] || {}, response)
+    end
+
+    def update_payment_from_paystack!(payment, data, raw_response)
+      paystack_status = data[:status].to_s
+      internal_status = case paystack_status
+      when "success" then "success"
+      when "failed", "abandoned", "timeout", "reversed" then "failed"
+      else "pending"
+      end
+
+      payment.update!(
+        status: internal_status,
+        paystack_transaction_id: data[:id].presence || payment.paystack_transaction_id,
+        channel: data[:channel].presence || payment.channel,
+        paid_at: data[:paid_at].presence || payment.paid_at,
+        paystack_metadata: raw_response
+      )
     end
 
     # Compact JSON for index — includes amenity summary, turf list, and image URLs
