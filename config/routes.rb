@@ -52,6 +52,16 @@ Rails.application.routes.draw do
 
   namespace :players do
     resources :turf_venues, only: [:index, :show]
+    resources :bookings, only: [:create, :index]
+  end
+
+  namespace :managers do
+    resources :bookings, only: [:index] do
+      member do
+        patch :confirm
+        patch :cancel
+      end
+    end
   end
 
   post "/paystack/webhook", to: "paystack_webhooks#create"
